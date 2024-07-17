@@ -1,90 +1,72 @@
-import { Pool } from "pg";
-import { BookRepository } from "../domain/BookRepository";
-import { Book } from "../domain/Book";
-import { BookId } from "../domain/BookId";
-import { BookName } from "../domain/BookName";
-import { BookCopies } from "../domain/BookCopies";
-import { BookGenre } from "../domain/BookGenre";
-import { BookImageUrl } from "../domain/BookImageUrl";
 
-type BookPostgres = {
+import { BookId } from '../domain/BookId';
+import { BookName } from '../domain/BookName';
+import { BookCopies } from '../domain/BookCopies';
+import { BookGenre } from '../domain/BookGenre';
+import { BookImageUrl } from '../domain/BookImageUrl';
+import { BookAuthor } from '../domain/BookAuthor';
+import { BookRepository } from '../domain/BookRepository';
+import { Book } from '../domain/Book';
+import BookModel from './ModelPostgres/BookModel';
+
+interface BookDTO {
    id: string;
    name: string;
    copies: number;
    genre: string;
+   author: string;
    image_url: string;
-}
+ }
+ 
 
 export class PostgresBookRepository implements BookRepository {
-   client: Pool;
-
-   constructor(database_url: string){
-      this.client = new Pool({
-         connectionString: database_url
-      })
-   }
-
-   async create(book: Book): Promise<void> {
-      const query = {
-         text: 'INSERT INTO books (id, name, copies, genre, image_url) VALUES ($1, $2, $3, $4, $5)',
-         values: [book.id.value, book.name.value, book.copies.value, book.genre.value, book.image_url.value]
-      }
-
-      await this.client.query(query);
+   async create(book: Book): Promise<void>{
+      await BookModel.create({
+         id: book.id.value,
+         name: book.name.value,
+         copies: book.copies.value,
+         genre: book.genre.value,
+         author: book.author.value,
+         image_url: book.image_url.value,
+      });
    }
 
    async getAll(): Promise<Book[]> {
-      const query = {
-         text: 'SELECT * FROM books'
-      }
-
-      const result = await this.client.query<BookPostgres>(query);
-
-      return result.rows.map((book) => this.mapBookToDomain(book));
+      const books = await BookModel.findAll() as BookDTO[];
+      return books.map(book => this.mapBookToDomain(book));
    }
 
-   async getOneById(id: BookId): Promise<Book | null> {
-      const query = {
-         text: 'SELECT * FROM books WHERE id = $1',
-         values: [id.value]
-      }
-
-      const result = await this.client.query<BookPostgres>(query);
-
-      if(result.rows.length === 0){
-         return null;
-      }
-
-      const book = result.rows[0];
-
-      return this.mapBookToDomain(book)
+   async getOneById(id: BookId):Promise<Book | null> {
+      const book = await BookModel.findByPk(id.value);
+      if (!book) return null;
+      return this.mapBookToDomain(book);
    }
 
    async update(book: Book): Promise<void> {
-      const query = {
-         text: 'UPDATE books SET name = $2, copies = $3, genre = $4, image_url = $5 WHERE id = $1',
-         values: [book.id.value, book.name.value, book.copies.value, book.genre.value, book.image_url.value]
-      }
-
-      await this.client.query(query);
+      await BookModel.update({
+         name: book.name.value,
+         copies: book.copies.value,
+         genre: book.genre.value,
+         image_url: book.image_url.value,
+      }, {
+         where: { id: book.id.value }
+      });
    }
 
    async delete(id: BookId): Promise<void> {
-      const query = {
-         text: 'DELETE FROM books WHERE id = $1',
-         values: [id.value]
-      }
-
-      await this.client.query(query);
+      await BookModel.destroy({
+         where: { id: id.value }
+      });
    }
 
-   private mapBookToDomain(book: BookPostgres ): Book {
+   mapBookToDomain(book : BookDTO): Book {
       return new Book(
          new BookId(book.id),
          new BookName(book.name),
          new BookCopies(book.copies),
          new BookGenre(book.genre),
+         new BookAuthor(book.author),
          new BookImageUrl(book.image_url)
       );
-   }
+   }  
 }

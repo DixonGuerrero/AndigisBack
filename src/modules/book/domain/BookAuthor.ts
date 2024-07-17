@@ -1,4 +1,4 @@
-export class BookId{
+export class BookAuthor{
    value: string;
 
    constructor(value: string){
@@ -10,8 +10,8 @@ export class BookId{
 
       this.value = this.value.toString();
 
-      if(this.value.length < 8){
-         throw new Error('BookId must be greater than 8 characters');
+      if(this.value.length < 1){
+         throw new Error('BookAuthor is very short');
       }
    }
 }
