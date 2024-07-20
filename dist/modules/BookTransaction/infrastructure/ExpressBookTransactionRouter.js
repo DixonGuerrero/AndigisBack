@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ExpressBookTransactionRouter = void 0;
+var express_1 = require("express");
+var ExpressBookTransactionController_1 = require("./ExpressBookTransactionController");
+var controller = new ExpressBookTransactionController_1.ExpressBookTransactionController();
+var ExpressBookTransactionRouter = (0, express_1.Router)();
+exports.ExpressBookTransactionRouter = ExpressBookTransactionRouter;
+ExpressBookTransactionRouter.get("/book-transaction/", controller.getAll);
+ExpressBookTransactionRouter.get("/book-transaction/:id", controller.getOneById);
+ExpressBookTransactionRouter.post("/book-transaction/", controller.create);
+ExpressBookTransactionRouter.put("/book-transaction/", controller.update);
+ExpressBookTransactionRouter.delete("/book-transaction/:id", controller.delete);

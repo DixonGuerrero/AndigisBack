@@ -1,12 +1,11 @@
-version: '3.9'
-
+version: '3.8'
 
 services:
-  postgres: 
-    image: postgres
-    env_file: ./.env
-    environment: 
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=
+
+  app:
+    build: .
     ports:
-      - 5432:5432
+      - $NODE_LOCAL_PORT:$NODE_DOCKER_PORT
+
+
+    

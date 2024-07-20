@@ -32,12 +32,12 @@ export class PostgresBookRepository implements BookRepository {
    }
 
    async getAll(): Promise<Book[]> {
-      const books = await BookModel.findAll() as BookDTO[];
+      const books = await BookModel.findAll() as unknown as BookDTO[];
       return books.map(book => this.mapBookToDomain(book));
    }
 
    async getOneById(id: BookId):Promise<Book | null> {
-      const book = await BookModel.findByPk(id.value);
+      const book = await BookModel.findByPk(id.value) as unknown as BookDTO;
       if (!book) return null;
       return this.mapBookToDomain(book);
    }

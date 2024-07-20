@@ -34,12 +34,12 @@ export class PostgresBookTransactionRepository implements BookTransactionReposit
    }
 
    async getAll(): Promise<BookTransaction[]> {
-      const booksTransaction = await BookTransactionModel.findAll() as BookTransactionDTO[];
+      const booksTransaction = await BookTransactionModel.findAll() as unknown as BookTransactionDTO[];
       return booksTransaction.map(bookTransaction => this.mapBookToDomain(bookTransaction));
    }
 
    async getOneById(id: BookTransactionId):Promise<BookTransaction | null> {
-      const bookTransaction = await BookTransactionModel.findByPk(id.value);
+      const bookTransaction = await BookTransactionModel.findByPk(id.value) as unknown as BookTransactionDTO;
       if (!bookTransaction) return null;
       return this.mapBookToDomain(bookTransaction);
    }
@@ -50,6 +50,7 @@ export class PostgresBookTransactionRepository implements BookTransactionReposit
          type: book.type.value,
          date: book.date.value,
          document: book.document.value,
+         name_render: book.name_render.value
       }, {
          where: { id: book.id.value }
       });
